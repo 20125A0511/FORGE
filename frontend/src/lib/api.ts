@@ -161,7 +161,8 @@ export interface LLMAnalysis {
 
 // --- API Client ---
 
-const API_BASE = "/api";
+const API_BASE =
+  (typeof process !== "undefined" && process.env?.NEXT_PUBLIC_API_URL) || "/api";
 
 async function fetchAPI<T>(
   endpoint: string,

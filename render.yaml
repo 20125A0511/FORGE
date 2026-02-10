@@ -1,0 +1,47 @@
+# FORGE - Render Blueprint
+# Deploy from GitHub: connect repo and use this Blueprint, or create services manually.
+# Docs: https://docs.render.com/blueprint-spec
+
+databases:
+  - name: forge-db
+    plan: free
+    databaseName: forge
+    user: forge
+
+services:
+  # Backend (FastAPI)
+  - type: web
+    name: forge-backend
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: forge-db
+          property: connectionString
+      - key: DATABASE_URL_SYNC
+        fromDatabase:
+          name: forge-db
+          property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: PYTHON_VERSION
+        value: "3.13.0"
+    # Add in Render Dashboard: ANTHROPIC_API_KEY, TWILIO_*, FRONTEND_BASE_URL, CORS_ORIGINS
+
+  # Frontend (Next.js)
+  - type: web
+    name: forge-frontend
+    runtime: node
+    plan: free
+    rootDir: frontend
+    buildCommand: "npm install && npm run build"
+    startCommand: "npm run start"
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      # Set NEXT_PUBLIC_API_URL in Dashboard to backend URL + /api, e.g. https://forge-backend.onrender.com/api

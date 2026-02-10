@@ -7,7 +7,7 @@ from sqlalchemy.orm import declarative_base
 from app.config import settings
 
 # Determine if we're using SQLite (for local dev without Docker)
-_is_sqlite = settings.DATABASE_URL.startswith("sqlite")
+_is_sqlite = settings.database_url_async.startswith("sqlite")
 
 # Engine configuration based on database type
 _engine_kwargs: dict = {
@@ -22,14 +22,14 @@ if not _is_sqlite:
     })
 
 # Async engine for normal operations
-engine = create_async_engine(settings.DATABASE_URL, **_engine_kwargs)
+engine = create_async_engine(settings.database_url_async, **_engine_kwargs)
 
 # Sync engine for migrations, seed_data, and init_db
 _sync_kwargs: dict = {"echo": settings.DEBUG}
 if not _is_sqlite:
     _sync_kwargs["pool_pre_ping"] = True
 
-sync_engine = create_engine(settings.DATABASE_URL_SYNC, **_sync_kwargs)
+sync_engine = create_engine(settings.database_url_sync, **_sync_kwargs)
 
 # Enable WAL mode and foreign keys for SQLite
 if _is_sqlite:
